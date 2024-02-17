@@ -1,0 +1,469 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>ㅏ</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400&;500&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        html, body{
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR';
+            font-weight: 400;
+            user-select: none;
+        }
+
+        #search{
+            position: absolute;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            margin-top: 5em;
+        }
+
+        #search > div {
+            /*display: flex;
+            justify-content: center;*/
+            width: 100%;
+        }
+
+        .search_stop{
+            width: auto;
+            height: 1.7em;
+            color: #2a9e77;
+            border: 1px solid #2a9e77;
+            margin: 1px;
+            padding: 0.2em 0.5em 0.2em 0.5em;
+            display: inline-block;
+            line-height: 1.5em;
+            cursor: pointer;
+        }
+
+        .search_stop_selected{
+            background-color: #2a9e77;
+            color: #FFF;
+        }
+
+        #result{
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        #result > #top {
+            background-color: #2a9e77;
+            color: #FFF;
+            width: calc(100% - 1em);
+            height: 3em;
+            line-height: 3em;
+            padding-left: 1em;
+            border-bottom: 2px solid #227c5e;
+        }
+
+        #result > #table{
+            position: absolute;
+            top: calc(3em + 2px);
+            left: 0;
+            width: 100%;
+            height: calc(100% - 3em - 2px);
+            overflow-y: auto;
+        }
+
+        #result > #table > div{
+            height: 3.5em;
+            width: 100%;
+            border-bottom: 1px solid #CCC;
+        }
+
+        #result > #table > div > div{
+            float: left;
+        }
+
+        #result > #table > div > .deptime{
+            padding-left: 1em;
+            line-height: 3.3em;
+            width: 3.5em;
+        }
+
+        #result > #table > div > .linenumber{
+            float: left;
+            height: calc(2.1em - 2px);
+            width: 2.8em;
+            text-align: center;
+            font-family: 'century';
+            font-size: 1.4em;
+            line-height: 2.0em;
+            color: #FFF;
+            background-color: #2a9e77;
+            border-bottom: 2px solid #227c5e;
+            margin-top: 0.2em;
+            border-radius: 0.3em;
+        }
+
+        #result > #table > div .route{
+            width: calc(100% - 10.3em);
+            padding-left: 1em;
+            line-height: 3.3em;
+        }
+
+        #result > #table > div .viaspace{
+            margin-top: 0.6em;
+            line-height: 1.1em;
+        }
+
+        #result > #table > div .route > span{
+            font-size: 0.8em;
+            display: block;
+            width: 100%;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow-x: clip;
+            font-weight: 400;
+        }
+
+        #result > #table > div .routeline{
+            background-color: #2a9e77;
+            width: 0.3em;
+            height:100%;
+            margin-left: 3.18em;
+            line-height: 3.4em;
+            color: #FFF;
+            float: left;
+        }
+
+        #result > #table > div .unableline{
+            background-color: #CCC;
+        }
+
+        .w600{
+            font-weight: 600;
+        }
+
+        @font-face{
+            font-family: 'century';
+            src: url("./centurybold.woff") format("woff");
+        }
+    </style>
+</head>
+<body>
+    <div id="search">
+        출발지<p />
+        <div id="search_start">
+        </div>
+        <p />
+        ↓<p />
+        도착지<p />
+        <div id="search_end">
+        </div>
+        <p />
+        <div id="search_go" class="search_stop" style="width: auto; margin-top: 3em; display: none;" onclick="clickSearch(this, 'search');">
+            &nbsp;시간표 찾기&nbsp;
+        </div>
+    </div>
+    <div id="result">
+        <div id="top">
+            <span id="back" style="cursor: pointer;" onclick="backSearch('search');">←</span>&nbsp;&nbsp;&nbsp;<span id="result_title"></span>
+        </div>
+        <div id="table">
+            <!--
+            <div>
+                <div class="deptime">7:25</div>
+                <div class="linenumber">67-1</div>
+                <div class="route">
+                    백의리 방향<br>
+                    <span style="font-size:0.8em;">전곡터미널, 청산역 경유</span>
+                </div>
+            </div>
+            -->
+        </div>
+    </div>
+
+    <div id="details" style="display: none;">
+        <div>
+            <div class="linenumber" style="margin-left: 1em;">%number%</div>
+            <div class="route" style="white-space: nowrap; overflow-x: clip; width: calc(100% - 7.5em);">
+                %start% → %dest%
+            </div>
+        </div>
+        <div style="height: calc(100% - 3.5em - 2px); border: unset;">
+            %table%
+            <div style="padding-left: 1.2em; padding-right: 1.2em; margin-top: 2em; line-height: 0.7em;">
+                <span style="font-size: 0.5em;">
+                    이 목록에는 일부 정류장만 표시되어 있으며, 예정된 운행시각은 도로상황에 따라 변동될 수 있습니다.
+                </span>
+            </div>
+            <!--
+            <div style="width: 100%; height: 3.5em;">
+                <div style="background-color: #2a9e77;width: 0.3em; height:100%; margin-left: 3.18em; line-height: 3.4em; color: #FFF; float: left;">◆</div>
+                <div class="route viaspace" style="margin-left: 3.5em;">
+                    용정공단<br>
+                    <span style="font-size:0.8em;">19:00</span>
+                </div>
+            </div>
+            <div style="width: 100%; height: 3.5em;">
+                <div style="background-color: #2a9e77;width: 0.3em; height:100%; margin-left: 3.18em; line-height: 3.4em; color: #FFF; float: left;">◆</div>
+                <div class="route viaspace" style="margin-left: 3.5em;">
+                    용정공단<br>
+                    <span style="font-size:0.8em;">19:00</span>
+                </div>
+            </div>
+            -->
+        </div>
+    </div>
+</body>
+<script>
+    var nowpage = 'search';
+    var search_start = null;
+    var search_dest = [];
+    var prevHTML = null;
+    var timetable = null;
+    var stations = ['백의리', '전곡역/터미널', '청산역', '소요산역', '포천시내'];
+    var routes = {
+        bind: {},
+        origin: {},
+        tables: {}
+    };
+    var bind = {
+        '전곡터미널': '전곡역/터미널',
+        '전곡역': '전곡역/터미널',
+        '포천시청': '포천시내'
+    };
+
+    function backSearch(){
+        if(nowpage == 'result'){
+            $('#result').css('display', 'none');
+            $('#search').css('display', 'block');
+            nowpage = 'search';
+        }
+        else if(nowpage == 'detail'){
+            $('#result').html(prevHTML);
+            nowpage = 'result';
+        }
+    }
+
+    function setSearch(){
+        $.ajax({
+            url: './timetable.txt?240216'
+        }).done(function(data){
+            var rowtable = data;
+            rowtable = rowtable.split('-----');
+            //console.log(rowtable);
+
+            timetable = {};
+            for(var i = 0; i < stations.length; i++){
+                timetable[stations[i]] = [];
+            }
+
+            for(var i = 0; i < rowtable.length; i++){
+                var thisroute = rowtable[i].trim().split('\n');
+                console.log(thisroute);
+
+                routes.bind[thisroute[0]] = [];
+                routes.origin[thisroute[0]] = [];
+                routes.tables[thisroute[0]] = [];
+
+                var rtstns = thisroute[1].split(',');
+                for(var j = 0; j < rtstns.length; j++){
+                    var bindname = rtstns[j].trim();
+                    routes.origin[thisroute[0]].push(bindname);
+                    if(bind[bindname] != undefined)  bindname = bind[bindname];
+                    routes.bind[thisroute[0]].push(bindname);
+                }
+                var binded = routes.bind[thisroute[0]];
+
+                for(var j = 2; j < thisroute.length; j++){
+                    var times = thisroute[j].split(',');
+                    routes.tables[thisroute[0]][j-2] = [];
+                    for(var k = 0; k < times.length; k++){
+                        time = times[k].trim()*1;
+
+                        console.log(time +'에'+ binded[k]);
+                        if(timetable[binded[k]] != undefined){
+                            if(timetable[binded[k]][time] == undefined)
+                                timetable[binded[k]][time] = [];
+                            timetable[binded[k]][time].push({'route': thisroute[0], 'number': j-2, 'station': k});
+                        }
+                        routes.tables[thisroute[0]][j-2][k] = time;
+                    }
+                }
+            }
+            
+            $('#search_go').css('display', 'inline-block');
+        });
+
+        var list = stations;
+        var start = '';
+        var end = '';
+        for(var i = 0; i < list.length; i++){
+            start+= `<div class="start_list_${list[i]} search_stop" onclick="clickSearch(this, 'start');">${list[i]}</div>`;
+            end  += `<div class="start_end_${list[i]} search_stop"  onclick="clickSearch(this, 'dest');">${list[i]}</div>`;
+        }
+        $('#search_start').html(start);
+        $('#search_end').html(end);
+    }
+    
+    function clickSearch(div, type){
+        //console.log($(div).attr('class'));
+        if(type == 'start'){
+            search_start = $(div).text();
+            $('#search_start > .search_stop_selected').removeClass('search_stop_selected');
+            $(div).addClass('search_stop_selected');
+            console.log('출발: '+ search_start);
+        }
+        else if(type == 'dest'){
+            if($(div).hasClass('search_stop_selected')){
+                search_dest = search_dest.filter((e) => e != $(div).text());
+                $(div).removeClass('search_stop_selected');
+            }
+            else{
+                search_dest.push($(div).text());
+                $(div).addClass('search_stop_selected');
+            }
+            console.log('도착: '+ search_dest);
+        }
+        else if(type == 'search'){
+            if(search_start == null || search_dest.length == 0){
+                alert('출발지와 도착지를 선택해야 합니다.\n도착지는 복수선택 할 수 있습니다.');
+                return;
+            }
+            if(search_dest.includes(search_start)){
+                if(search_dest.length == 1){
+                    alert('출발지와 도착지가 같을 수는 없습니다.');
+                    return;
+                }
+                alert(`출발지와 같은 도착지 "${search_start}"은(는) 제외하고 검색합니다.`);
+                search_dest = search_dest.filter((e) => e != search_start);
+            }
+            goSearch();
+        }
+        
+    }
+
+    function goSearch(){
+        var alltable = timetable[search_start];
+        var abletable = [];
+        var viapoint = {};
+        for(var i = 0; i <= 2400; i++){
+            if(alltable[i] == undefined)    continue;
+            for(var j = 0; j < alltable[i].length; j++){
+                var thisroute = alltable[i][j];
+                for(var k = 0; k < search_dest.length; k++){
+                    var destindex = routes.bind[thisroute.route].indexOf(search_dest[k]);
+                    if(destindex > thisroute.station){
+                        console.log(`${i}에 ${thisroute.route}, ${search_dest[k]}`);
+
+                        if(abletable[i] == undefined)    abletable[i] = [];
+                        if(abletable[i].includes(thisroute) == false)   abletable[i].push(thisroute);
+
+                        if(viapoint[thisroute.route] == undefined)  viapoint[thisroute.route] = [];
+                        if(viapoint[thisroute.route].includes(routes.origin[thisroute.route][destindex]) == false){
+                            if(routes.origin[thisroute.route][destindex] != thisroute.route.split(',')[1].trim())
+                            viapoint[thisroute.route][destindex] = routes.origin[thisroute.route][destindex];
+                        }
+                    }
+                }
+            }
+        }
+        console.log(abletable);
+        console.log(viapoint);
+
+        if(abletable.length == 0){
+            alert('해당 경로의 검색 결과가 없습니다.');
+            return;
+        }
+
+        var output = '';
+        for(var i = 0; i <= 2400; i++){
+            if(abletable[i] == undefined)   continue;
+            var deptime = i+'';
+            deptime = `${deptime.substring(0, deptime.length-2)}:${deptime.substring(deptime.length-2, deptime.length)}`;
+            for(var j = 0; j < abletable[i].length; j++){
+                var thisroute = abletable[i][j];
+                var linenumber = thisroute.route.split(',')[0].trim();
+                var destination = thisroute.route.split(',')[1].trim();
+                var viastring = '';
+                var addclass = '';
+                for(var k = 0; k < viapoint[thisroute.route].length; k++){
+                    if(viapoint[thisroute.route][k] == undefined)   continue;
+                    viastring+= `${viapoint[thisroute.route][k]}, `;
+                }
+                if(viastring != ''){
+                    viastring = viastring.substring(0, viastring.length-2)+' 경유';
+                    addclass = 'viaspace';
+                }
+
+                output+= `
+                    <div onclick="detailSearch('${thisroute.route}', ${thisroute.number}, ${thisroute.station});">
+                        <div class="deptime">${deptime}</div>
+                        <div class="linenumber">${linenumber}</div>
+                        <div class="route ${addclass}">
+                            ${destination}<br>
+                            <span>${viastring}</span>
+                        </div>
+                    </div>
+                `;
+
+            }
+        }
+
+        $('#result').css('display', 'block');
+        $('#search').css('display', 'none');
+        $('#result_title').text(`${search_start} 출발 시간표`);
+        $('#table').html(output);
+        nowpage = 'result';
+        history.pushState(null, null, '');
+    }
+
+    function detailSearch(route, number, station){
+        prevHTML = $('#result').html();
+        $('#back').attr('onclick', "backSearch('result')");
+        $('#result_title').text('경로 상세정보');
+
+        var base = $('#details').html();
+        base = base.replace('%number%', route.split(',')[0].trim());
+        base = base.replace('%start%', routes.origin[route][0]);
+        base = base.replace('%dest%', routes.origin[route][routes.origin[route].length-1]);
+
+        var table = '';
+        for(var i = 0; i < routes.origin[route].length; i++){
+            var deptime = routes.tables[route][number][i]+'';
+
+            var addclass_line = '';
+            if(i < station)    addclass_line = 'unableline';
+            
+            var addclass_text = '';
+            if(i == station)    addclass_text = 'w600';
+            if(search_dest.includes(routes.bind[route][i])) addclass_text = 'w600';
+
+            table+= `
+            <div style="width: 100%; height: 3.5em;">
+                <div class="routeline ${addclass_line}">◆</div>
+                <div class="route viaspace ${addclass_text}" style="margin-left: 3.5em;">
+                    ${routes.origin[route][i]}<br>
+                    <span>${deptime.substring(0, deptime.length-2)}:${deptime.substring(deptime.length-2, deptime.length)}</span>
+                </div>
+            </div>
+            `;
+        }
+        base = base.replace('%table%', table);
+
+        $('#table').html(base);
+        nowpage = 'detail';
+        history.pushState(null, null, '');
+    }
+    setSearch();
+
+    window.onpopstate = function(event){
+        backSearch();
+    }
+</script>
+</html>
