@@ -231,7 +231,8 @@
     var routes = {
         bind: {},
         origin: {},
-        tables: {}
+        tables: {},
+	esti: {}
     };
     var bind = {
         '전곡터미널': '전곡역/터미널',
@@ -272,10 +273,17 @@
                 routes.bind[thisroute[0]] = [];
                 routes.origin[thisroute[0]] = [];
                 routes.tables[thisroute[0]] = [];
+		routes.esti[thisroute[0]] = [];
 
                 var rtstns = thisroute[1].split(',');
                 for(var j = 0; j < rtstns.length; j++){
                     var bindname = rtstns[j].trim();
+		    if(bindname.includes('?')){
+			bindname = bindname.replace('?', '');
+			routes.esti[thisroute[0]].push(true);
+		    }
+		    else routes.esti[thisroute[0]].push(false);
+			
                     routes.origin[thisroute[0]].push(bindname);
                     if(bind[bindname] != undefined)  bindname = bind[bindname];
                     routes.bind[thisroute[0]].push(bindname);
