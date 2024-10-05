@@ -170,9 +170,9 @@
         </div>
         <p />
         <span style="font-size: 0.8em;">
-        	[24/03/17] 24/03/11 개정 56, 56-1번 운행시간표를 반영하였습니다.<br>
-			[24/05/25] 24/05/03 개정 56번 운행시간표를 반영하였습니다.<br>
-			[24/08/26] 24/08/19 개정 68번 운행시간표를 반영하였습니다.
+			- 최근 갱신 내역 -<br>
+			[24/10/05] 24/10/01 개정 반영: 68번<br>
+			[24/05/25] 24/05/03 개정 반영: 56, 56-1번
         </span>
     </div>
     <div id="result">
@@ -262,7 +262,7 @@
 
     function setSearch(){
         $.ajax({
-            url: './timetable.txt?240819'
+            url: './timetable.txt?241001'
         }).done(function(data){
             var rowtable = data;
             rowtable = rowtable.split('-----');
