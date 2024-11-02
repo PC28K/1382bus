@@ -171,9 +171,12 @@
         <p style="font-size: 0.8em;">
     		- 최근 갱신 내역 -<p />
         	<span style="text-align: left;display: inline-block;">
-				[24/10/05] 24/10/01 개정 반영: 68번<br>
-				[24/05/25] 24/05/03 개정 반영: 56, 56-1번
+			[24/11/02] 24/11/01 개정 반영: 56, 56-1, 56-2번<br>
+			[24/10/05] 24/10/01 개정 반영: 68번
         	</span>
+		<script>
+			let ttver = 241101; //최종갱신일자
+		</script>
 		</p>
     </div>
     <div id="result">
@@ -263,7 +266,7 @@
 
     function setSearch(){
         $.ajax({
-            url: './timetable.txt?241001'
+            url: `./timetable.txt?${ttver}`
         }).done(function(data){
             var rowtable = data;
             rowtable = rowtable.split('-----');
